@@ -2,20 +2,18 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
     container_name: researcher_backend
-    ports:
-      - "3000:3000"
     env_file:
       - ./backend/.env
+    ports:
+      - "3001:3001"
     restart: unless-stopped
     networks:
-      - researcher_network
+      - researcher
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
     container_name: researcher_frontend
     ports:
       - "80:80"
@@ -23,8 +21,7 @@ services:
       - backend
     restart: unless-stopped
     networks:
-      - researcher_network
+      - researcher
 
 networks:
-  researcher_network:
-    driver: bridge
+  researcher:
