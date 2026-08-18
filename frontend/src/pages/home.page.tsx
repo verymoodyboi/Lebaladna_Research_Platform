@@ -328,8 +328,7 @@ export default function HomePage(): React.ReactElement {
     <Layout>
       <HomeStyle />
 
-      <Layout.Header userInfo={userInfo} />
-
+      <Layout.Header userInfo={userInfo ?? undefined} />
       <Layout.Body>
         <section className="flex items-start justify-between gap-4 pb-8 pt-4">
           <div>
