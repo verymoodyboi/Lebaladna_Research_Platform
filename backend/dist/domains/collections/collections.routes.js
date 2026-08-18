@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const collections_controller_1 = require("./collections.controller");
+const auth_middleware_1 = require("../../middleware/auth.middleware");
+const router = (0, express_1.Router)();
+router.get("/", auth_middleware_1.requireAuth, collections_controller_1.listCollections);
+router.get("/:collectionId", auth_middleware_1.requireAuth, collections_controller_1.getCollection);
+router.post("/", auth_middleware_1.requireAuth, collections_controller_1.createCollection);
+exports.default = router;
