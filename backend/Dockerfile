@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
@@ -15,12 +15,13 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+ENV NODE_ENV=production
 
+COPY package*.json ./
 RUN npm ci --omit=dev
 
-COPY --from=builder /app/dist ./dist
+COPY --from=build /app/dist ./dist
 
-EXPOSE 3000
+EXPOSE 3001
 
 CMD ["node", "dist/server.js"]
