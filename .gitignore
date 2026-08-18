@@ -5,7 +5,7 @@ node_modules/
 .env
 .env.*
 
-# Optional: keep example env files
+# Keep example environment files
 !.env.example
 
 # Build output
