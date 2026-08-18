@@ -1210,7 +1210,7 @@ export default function CollectionPage(): React.ReactElement {
 
   return (
     <Layout>
-      <Layout.Header userInfo={userInfo} />
+      <Layout.Header userInfo={userInfo ?? undefined} />{" "}
       <Layout.Body>
         <section className="flex items-center justify-between gap-4 pb-6 pt-4">
           <button
@@ -1383,9 +1383,7 @@ export default function CollectionPage(): React.ReactElement {
           </>
         )}
       </Layout.Body>
-
       <Layout.Footer />
-
       <SurveyDetailDialog
         survey={selected}
         onClose={() => setSelected(null)}
@@ -1394,7 +1392,6 @@ export default function CollectionPage(): React.ReactElement {
           await refreshAfterSurveyChange();
         }}
       />
-
       <AddAreaDialog
         open={addAreaOpen}
         initialProvince={collection?.province ?? ""}
@@ -1402,7 +1399,6 @@ export default function CollectionPage(): React.ReactElement {
         onClose={() => setAddAreaOpen(false)}
         onCreated={handleAreaCreated}
       />
-
       <FillSurveyDialog
         open={fillOpen}
         collectionId={collectionId}

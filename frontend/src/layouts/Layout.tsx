@@ -141,12 +141,12 @@ function Logomark(): React.ReactElement {
 }
 
 export interface HeaderUserInfo {
-  first_name?: string;
-  last_name?: string;
-  username?: string;
-  bio?: string;
-  role?: string;
-  pfp_path?: string;
+  first_name?: any;
+  last_name?: any;
+  username?: any;
+  bio?: any;
+  role?: any;
+  pfp_path?: any;
 }
 
 interface ProfileMenuProps {
@@ -164,7 +164,7 @@ function ProfileMenu({ userInfo }: ProfileMenuProps): React.ReactElement {
   const name = userInfo?.username || "";
   const initials = name
     .split(" ")
-    .map((part) => part[0])
+    .map((part: any) => part[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();

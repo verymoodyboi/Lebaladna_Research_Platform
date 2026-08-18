@@ -10,7 +10,11 @@ interface PfpUploadProps {
 const MAX_FILE_SIZE_MB = 5;
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
-const PfpUpload = ({ initialUrl = null, onFileSelected, disabled }: PfpUploadProps) => {
+const PfpUpload = ({
+  initialUrl = null,
+  onFileSelected,
+  disabled,
+}: PfpUploadProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialUrl);
   const [error, setError] = useState("");
@@ -67,8 +71,11 @@ const PfpUpload = ({ initialUrl = null, onFileSelected, disabled }: PfpUploadPro
   };
 
   return (
-    <Stack spacing={1.5} alignItems="center">
-      <Avatar src={previewUrl ?? undefined} sx={{ width: 96, height: 96, fontSize: 32 }} />
+    <Stack spacing={1.5}>
+      <Avatar
+        src={previewUrl ?? undefined}
+        sx={{ width: 96, height: 96, fontSize: 32 }}
+      />
 
       <Stack direction="row" spacing={1.5}>
         <Button
