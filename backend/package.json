@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-"scripts": {
+  "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js"
@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
+    "amqplib": "^2.0.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^4.17.1",
