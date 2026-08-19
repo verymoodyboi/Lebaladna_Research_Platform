@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { Box, CircularProgress } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 
 import { useAuth } from "../contexts/AuthContext";
 
@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { status } = useAuth();
+  const { status, user } = useAuth();
 
   if (status === "loading") {
     return (
@@ -32,6 +32,23 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   if (status === "profileSetup") {
     return <Navigate to="/profile/setup" replace />;
+  }
+
+  if (user?.authorized === false) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography variant="h6">
+          Waiting for admin to grant you access
+        </Typography>
+      </Box>
+    );
   }
 
   return <>{children}</>;
