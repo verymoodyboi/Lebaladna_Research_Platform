@@ -27,6 +27,7 @@ interface UserInfo {
   bio: string | null;
   role: string | null;
   pfp_path: string | null;
+  autherized: any;
 }
 
 interface AuthContextType {
