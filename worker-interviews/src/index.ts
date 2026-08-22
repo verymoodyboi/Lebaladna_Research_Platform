@@ -68,14 +68,12 @@ export default {
         const job = normalizeMessage(msg.body);
         await processJob(job, env);
       } catch (err) {
-        // Message shape itself was unrecognized — nothing to update in
-        // Supabase since we have no job_id. Goes to the dead-letter queue
-        // for manual inspection instead of silently vanishing.
+
         console.error("Failed to normalize/process queue message:", err);
         msg.ack();
         continue;
       }
-      msg.ack(); // always ack — we never want Cloudflare's own auto-retry
+      msg.ack(); 
     }
   },
 };

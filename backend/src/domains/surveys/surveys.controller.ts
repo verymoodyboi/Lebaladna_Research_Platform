@@ -10,6 +10,7 @@ const parseFilters = (query: any) => {
   const dateFrom = typeof query.date_from === "string" ? query.date_from : undefined;
   const dateTo = typeof query.date_to === "string" ? query.date_to : undefined;
   const areaId = typeof query.area_id === "string" ? query.area_id : undefined;
+  const team = typeof query.team === "string" ? query.team : undefined;
   const memberId =
     typeof query.member_id === "string" ? query.member_id : undefined;
 
@@ -19,7 +20,7 @@ const parseFilters = (query: any) => {
     }
   }
 
-  return { dateFrom, dateTo, areaId, memberId };
+  return { dateFrom, dateTo, areaId, memberId, team };
 };
 
 export const listSurveys = async (req: any, res: any) => {
@@ -72,8 +73,8 @@ export const createSurvey = async (req: any, res: any) => {
       health_notes,
       additional_notes,
       collection_id,
+      team
     } = req.body ?? {};
-
     if (typeof subject_name !== "string" || !subject_name.trim()) {
       return res.status(400).json({ message: "Subject name is required." });
     }
@@ -119,6 +120,7 @@ export const createSurvey = async (req: any, res: any) => {
       additional_notes: additional_notes || null,
       collection_id,
       created_by: profile.user_id,
+      team: team
     });
 
     const normalizedSurvey = {

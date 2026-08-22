@@ -20,7 +20,8 @@ const SURVEY_COLUMNS = `
   collection_id,
   created_by,
   created_at,
-  creator:users(user_id, first_name, last_name)
+  creator:users(user_id, first_name, last_name),
+  team
 `;
 
 export interface SurveyFilters {
@@ -28,6 +29,7 @@ export interface SurveyFilters {
   dateTo?: string;
   areaId?: string;
   memberId?: string;
+  team?:string
 }
 
 export interface SurveyStats {
@@ -109,6 +111,11 @@ export const getSurveysByCollection = async (
     query = query.eq("created_by", filters.memberId);
   }
 
+  if (filters.team) {
+    query = query.eq("team", filters.team);
+  }
+
+
   if (filters.dateFrom) {
     query = query.gte("created_at", filters.dateFrom);
   }
@@ -149,6 +156,7 @@ export interface CreateSurveyInput {
   additional_notes?: string | null;
   collection_id: string;
   created_by: string;
+  team?:string
 }
 
 export const createSurvey = async (input: CreateSurveyInput) => {

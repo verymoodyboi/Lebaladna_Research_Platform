@@ -19,7 +19,8 @@ const AREA_COLUMNS = `
   guide_phone_number,
   created_at,
   updated_at,
-  collection_id
+  collection_id,
+  teams
 `;
 const getAreasByCollection = async (collectionId) => {
     const { data, error } = await supabase_1.default
@@ -63,6 +64,7 @@ const createArea = async (input) => {
         collection_id: input.collection_id,
         area_name: input.area_name,
         province: input.province,
+        teams: input.teams
     })
         .select(AREA_COLUMNS)
         .single();
