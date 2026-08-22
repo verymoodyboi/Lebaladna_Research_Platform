@@ -34,6 +34,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/profile/setup" replace />;
   }
 
+  if (status === "pending") {
+    console.log("userInfo.autherized:", userInfo?.autherized);
+    return <Navigate to="/pending" replace />;
+  }
+
   return <>{children}</>;
 };
 

@@ -6,7 +6,7 @@ interface UpdateUserProfileInput {
   username: string;
   bio?: string;
   pfp_path?: string;
-  autherized:any;
+autherized: any;
 }
 
 export async function updateUserProfile(authId: string, input: UpdateUserProfileInput) {

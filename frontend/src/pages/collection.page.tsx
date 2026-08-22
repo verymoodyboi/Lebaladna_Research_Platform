@@ -801,11 +801,13 @@ function FillSurveyDialog({
                         className="peer sr-only"
                       />
 
-                      <span className="relative h-6 w-11 rounded-full bg-sage-200 transition peer-checked:bg-ink">
-                        <span className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-5" />
-                      </span>
+<span className="relative h-6 w-11 rounded-full border border-sage-300 bg-sage-100 transition peer-checked:border-emerald-600 peer-checked:bg-emerald-600">
+  <span className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-5" />
+</span>
 
-                      {key.charAt(0).toUpperCase() + key.slice(1)}
+<span className="peer-checked:font-semibold peer-checked:text-emerald-700">
+  {key.charAt(0).toUpperCase() + key.slice(1)}
+</span>
                     </label>
                   ))}
                 </div>

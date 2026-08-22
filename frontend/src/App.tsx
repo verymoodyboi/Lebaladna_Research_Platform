@@ -7,15 +7,16 @@ import HomePage from "./pages/home.page";
 import AuthCallbackPage from "./pages/auth-callback.page";
 import SetupProfilePage from "./pages/setup-profile.page";
 import CollectionPage from "./pages/collection.page";
+import PendingPage from "./pages/pending.page";
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/auth/setup-profile" element={<SetupProfilePage />} />
+        <Route path="/pending" element={<PendingPage />} />
         <Route
           path="/"
           element={

@@ -9,8 +9,7 @@ const PROFILE_COLUMNS = `
   bio,
   role,
   pfp_path,
-  autherized
-  
+autherized
 `;
 
 export const getUserProfile = async (authId: string) => {
