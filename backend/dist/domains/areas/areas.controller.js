@@ -31,7 +31,7 @@ const createArea = async (req, res) => {
                 message: "Only managers and admins can add areas.",
             });
         }
-        const { collection_id, area_name, province } = req.body ?? {};
+        const { collection_id, area_name, province, teams } = req.body ?? {};
         if (typeof collection_id !== "string" || !collection_id) {
             return res.status(400).json({
                 message: "Collection is required.",
@@ -53,6 +53,7 @@ const createArea = async (req, res) => {
             collection_id,
             area_name: area_name.trim(),
             province: province.trim(),
+            teams: teams
         });
         return res.status(201).json({ area });
     }

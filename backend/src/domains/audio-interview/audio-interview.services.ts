@@ -5,7 +5,7 @@ import supabase from '../../lib/supabase';
 
 const r2 = new S3Client({
   region: 'auto',
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  endpoint: process.env.R2_ENDPOINT,
   credentials: {
     accessKeyId: process.env.R2_ACCESS_KEY_ID!,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
@@ -44,11 +44,14 @@ export async function createJob(userId: string) {
 }
 
 export async function getJob(jobId: any) {
-  const { data, error } = await supabase
-    .from('interview_jobs')
-    .select('id, status, transcript, extracted_data, error_message, created_at, completed_at')
-    .eq('id', jobId)
-    .single();
+const oneMinuteAgo = new Date(Date.now() - 120 * 1000).toISOString();
+
+const { data, error } = await supabase
+  .from('interview_jobs')
+  .select('id, status, transcript, extracted_data, error_message, created_at, completed_at')
+  .eq('id', jobId)
+  .gte('created_at', oneMinuteAgo)
+  .single();
 
   if (error) {
     if (error.code === 'PGRST116') return null; // no matching row
