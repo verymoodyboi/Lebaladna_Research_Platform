@@ -6,14 +6,14 @@ import userRoutes from "./domains/user/user.routes";
 import collectionsRoutes from "./domains/collections/collections.routes";
 import surveysRoutes from "./domains/surveys/surveys.routes";
 import areasRoutes from "./domains/areas/areas.routes";
-
-
+import interviewRoutes from "./domains/audio-interview/audio-interview.routes"
 
 export const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "0http://localhost:5173",
+
   }),
 );
 
@@ -28,3 +28,4 @@ app.use("/api/user", userRoutes);
 app.use("/api/collections", collectionsRoutes);
 app.use("/api/surveys", surveysRoutes);
 app.use("/api/areas", areasRoutes);
+app.use('/interviews', interviewRoutes);

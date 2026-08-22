@@ -1,0 +1,17 @@
+name = "interview-pipeline-worker"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[[r2_buckets]]
+binding = "AUDIO_BUCKET"
+bucket_name = "interview-audio"
+
+[[queues.producers]]
+binding = "JOB_QUEUE"
+queue = "interview-jobs"
+
+[[queues.consumers]]
+queue = "interview-jobs"
+max_batch_size = 1        # keep concurrency low, matches your droplet's need for control
+max_retries = 0            # we handle retry manually — Cloudflare must NOT auto-retry
+dead_letter_queue = "interview-jobs-dlq"
