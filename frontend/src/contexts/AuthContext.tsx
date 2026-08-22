@@ -16,7 +16,8 @@ type AuthStatus =
   | "loading"
   | "unauthenticated"
   | "authenticated"
-  | "profileSetup";
+  | "profileSetup"
+  | "pending";
 
 interface UserInfo {
   user_id: string;
@@ -84,8 +85,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const profile = response.data?.userInfo ?? null;
 
       if (profile) {
+        console.log("userInfo.autherized:", profile.autherized);
+
         setUserInfo(profile);
-        setStatus("authenticated");
+        setStatus(profile.autherized === false ? "pending" : "authenticated");
         return;
       }
 

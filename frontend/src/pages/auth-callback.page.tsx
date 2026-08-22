@@ -8,7 +8,8 @@ import { fetchMe } from "../features/auth/services/auth.services";
  * Landing route for Supabase OAuth (Google) redirects, and for the
  * emailRedirectTo confirmation link. Resolves the session, then checks
  * whether a `public.users` row already exists for this auth user:
- *  - exists    -> /home
+ *  - exists, autherized === false -> /pending
+ *  - exists, autherized !== false -> /home
  *  - missing   -> /setup-profile (first-time Google sign-in, or a just
  *                 confirmed email/password signup)
  */
@@ -28,11 +29,19 @@ const AuthCallbackPage = () => {
 
       try {
         const { userInfo } = await fetchMe();
-        navigate(userInfo ? "/home" : "/auth/setup-profile", { replace: true });
+
+        if (!userInfo) {
+          navigate("/auth/setup-profile", { replace: true });
+        } else if (userInfo.autherized === false) {
+          console.log("userInfo.autherized:", userInfo.autherized);
+          navigate("/pending", { replace: true });
+        } else {
+          navigate("/home", { replace: true });
+        }
       } catch (fetchError) {
         console.error("Error checking profile:", fetchError);
 
-        navigate("/setup-profile", { replace: true });
+        navigate("/auth/setup-profile", { replace: true });
       }
     };
 

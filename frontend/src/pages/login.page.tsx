@@ -1,18 +1,6 @@
-import React, { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 
-import {
-  fetchMe,
-  loginWithEmail,
-  loginWithGoogle,
-} from "../features/auth/services/auth.services";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-interface FieldErrors {
-  email?: string;
-  password?: string;
-}
+import { loginWithGoogle } from "../features/auth/services/auth.services";
 
 /**
  * Shared brand style block — mirrors home.page.tsx exactly (same CSS
@@ -68,17 +56,6 @@ function BrandStyle(): React.ReactElement {
         background: linear-gradient(90deg, var(--sage-500), var(--sky-500));
       }
 
-      .btn-primary {
-        background: linear-gradient(135deg, var(--sage-500), var(--sky-500));
-        color: white;
-        transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-      }
-      .btn-primary:hover:not(:disabled) {
-        transform: translateY(-1px);
-        box-shadow: 0 12px 24px -12px rgba(0, 175, 240, 0.45);
-      }
-      .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
       .btn-secondary {
         background: white;
         color: var(--ink);
@@ -91,43 +68,9 @@ function BrandStyle(): React.ReactElement {
       }
       .btn-secondary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-      .input-brand {
-        border: 1px solid #E3E8DA;
-        background-color: white;
-        transition: border-color 0.15s ease, box-shadow 0.15s ease;
-      }
-      .input-brand:focus { border-color: var(--sky-300); }
-      .input-brand:disabled { background-color: var(--sage-50); }
-      .input-brand.input-invalid { border-color: var(--rose-600); }
-
       .focus-brand:focus-visible {
         outline: 2px solid var(--sky-500);
         outline-offset: 2px;
-      }
-
-      .link-brand { color: var(--sky-700); font-weight: 500; }
-      .link-brand:hover { text-decoration: underline; }
-
-      .field-error {
-        color: var(--rose-600);
-        font-size: 0.75rem;
-      }
-
-      .divider-brand {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        color: var(--ink-soft);
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-      .divider-brand::before,
-      .divider-brand::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background-color: #EAEEE1;
       }
 
       .alert-error {
@@ -135,18 +78,6 @@ function BrandStyle(): React.ReactElement {
         color: var(--rose-600);
         border: 1px solid #F5D9D6;
       }
-      .alert-success {
-        background-color: var(--sage-50);
-        color: var(--sage-700);
-        border: 1px solid var(--sage-200);
-      }
-
-      .pfp-dropzone {
-        border: 1.5px dashed var(--sage-300);
-        background-color: var(--sage-50);
-        transition: border-color 0.15s ease, background-color 0.15s ease;
-      }
-      .pfp-dropzone:hover { border-color: var(--sky-300); background-color: var(--sky-50); }
 
       .animate-riseIn {
         opacity: 0;
@@ -172,6 +103,29 @@ function Logomark(): React.ReactElement {
       aria-hidden="true"
       src="https://lxxnumywddjyjnoqirxe.supabase.co/storage/v1/object/public/assits/logo_1.png"
     />
+  );
+}
+
+function GoogleIcon(): React.ReactElement {
+  return (
+    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+      <path
+        fill="#FFC107"
+        d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
+      />
+      <path
+        fill="#FF3D00"
+        d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"
+      />
+      <path
+        fill="#4CAF50"
+        d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"
+      />
+      <path
+        fill="#1976D2"
+        d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"
+      />
+    </svg>
   );
 }
 
@@ -219,74 +173,8 @@ function AuthShell({
 }
 
 const LoginPage = () => {
-  const navigate = useNavigate();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-
-  const validate = (): FieldErrors => {
-    const errors: FieldErrors = {};
-
-    if (!email.trim()) {
-      errors.email = "Email is required.";
-    } else if (!EMAIL_REGEX.test(email.trim())) {
-      errors.email = "Enter a valid email address.";
-    }
-
-    if (!password) {
-      errors.password = "Password is required.";
-    }
-
-    return errors;
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    setError("");
-
-    const errors = validate();
-    setFieldErrors(errors);
-
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await loginWithEmail(email.trim(), password);
-
-      // A confirmed email/password user might still be missing their
-      // public.users row (e.g. they signed up, confirmed by email, and
-      // this is their first login) — send them to finish setup.
-      const { userInfo } = await fetchMe();
-
-      if (!userInfo) {
-        navigate("/auth/setup-profile", { replace: true });
-      } else if (userInfo.autherized === false) {
-        console.log("userInfo.autherized:", userInfo.autherized);
-        navigate("/pending", { replace: true });
-      } else {
-        navigate("/", { replace: true });
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Unable to sign in. Please check your credentials.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleGoogleLogin = async () => {
     setError("");
@@ -319,96 +207,15 @@ const LoginPage = () => {
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          noValidate
-          className="flex flex-col gap-4"
-        >
-          <label className="flex w-full flex-col gap-1.5" htmlFor="email">
-            <span className="text-sm font-medium text-ink">Email</span>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => {
-                setEmail(event.target.value);
-                if (fieldErrors.email) {
-                  setFieldErrors((prev) => ({ ...prev, email: undefined }));
-                }
-              }}
-              aria-invalid={Boolean(fieldErrors.email)}
-              disabled={loading || googleLoading}
-              className={`input-brand focus-brand w-full rounded-xl px-3.5 py-2.5 text-sm text-ink disabled:cursor-not-allowed disabled:opacity-60 ${
-                fieldErrors.email ? "input-invalid" : ""
-              }`}
-            />
-            {fieldErrors.email && (
-              <span className="field-error">{fieldErrors.email}</span>
-            )}
-          </label>
-
-          <label className="flex w-full flex-col gap-1.5" htmlFor="password">
-            <span className="text-sm font-medium text-ink">Password</span>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(event) => {
-                setPassword(event.target.value);
-                if (fieldErrors.password) {
-                  setFieldErrors((prev) => ({ ...prev, password: undefined }));
-                }
-              }}
-              aria-invalid={Boolean(fieldErrors.password)}
-              disabled={loading || googleLoading}
-              className={`input-brand focus-brand w-full rounded-xl px-3.5 py-2.5 text-sm text-ink disabled:cursor-not-allowed disabled:opacity-60 ${
-                fieldErrors.password ? "input-invalid" : ""
-              }`}
-            />
-            {fieldErrors.password && (
-              <span className="field-error">{fieldErrors.password}</span>
-            )}
-          </label>
-
-          <div className="text-right">
-            <Link
-              to="#"
-              className="text-sm text-ink-soft transition-colors hover:text-ink hover:underline"
-            >
-              Forgot password?
-            </Link>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading || googleLoading}
-            className="btn-primary focus-brand w-full rounded-xl py-3 text-sm font-semibold"
-          >
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
-
-        <div className="divider-brand">or</div>
-
         <button
           type="button"
           onClick={handleGoogleLogin}
-          disabled={loading || googleLoading}
-          className="btn-secondary focus-brand w-full rounded-xl py-3 text-sm font-medium"
+          disabled={googleLoading}
+          className="btn-secondary focus-brand flex w-full items-center justify-center gap-2.5 rounded-xl py-3 text-sm font-medium"
         >
+          <GoogleIcon />
           {googleLoading ? "Connecting..." : "Continue with Google"}
         </button>
-
-        <p className="text-center text-sm text-ink-soft">
-          Don't have an account?{" "}
-          <Link to="/signup" className="link-brand">
-            Create one
-          </Link>
-        </p>
       </div>
     </AuthShell>
   );
