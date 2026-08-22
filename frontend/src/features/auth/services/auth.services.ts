@@ -113,6 +113,7 @@ export interface UserProfile {
   bio: string | null;
   role: string | null;
   pfp_path: string | null;
+  autherized: any;
 }
 
 /** Creates the `public.users` row for the currently authenticated user. */

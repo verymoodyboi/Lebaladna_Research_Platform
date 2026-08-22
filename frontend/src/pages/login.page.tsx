@@ -267,7 +267,14 @@ const LoginPage = () => {
       // this is their first login) — send them to finish setup.
       const { userInfo } = await fetchMe();
 
-      navigate(userInfo ? "/home" : "/setup-profile", { replace: true });
+      if (!userInfo) {
+        navigate("/auth/setup-profile", { replace: true });
+      } else if (userInfo.autherized === false) {
+        console.log("userInfo.autherized:", userInfo.autherized);
+        navigate("/pending", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     } catch (error) {
       console.error("Login error:", error);
 
