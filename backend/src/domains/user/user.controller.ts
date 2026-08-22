@@ -12,7 +12,7 @@ export async function updateProfile(req: any, res: Response): Promise<void> {
     return;
   }
 
-  const { first_name, last_name, username, bio, pfp_path } = req.body ?? {};
+  const { first_name, last_name, username, bio, pfp_path, autherized } = req.body ?? {};
 
   if (!first_name || !last_name || !username) {
     res.status(400).json({ error: "first_name, last_name, and username are required." });
@@ -26,6 +26,7 @@ export async function updateProfile(req: any, res: Response): Promise<void> {
       username,
       bio,
       pfp_path,
+autherized
     });
 
     res.status(200).json({ userInfo: updatedUser });
