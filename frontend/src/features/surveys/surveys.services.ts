@@ -20,6 +20,7 @@ export interface Survey {
   collection_id: string;
   created_by: string | null;
   created_at: string;
+  team?: any;
   creator?: { user_id?: string; first_name: string; last_name: string } | null;
 }
 
@@ -40,6 +41,7 @@ export interface SurveyFilters {
   dateTo?: string;
   areaId?: string;
   memberId?: string;
+  team?:any
 }
 
 export const listSurveys = (collectionId: string, filters: SurveyFilters = {}) => {
@@ -47,6 +49,7 @@ export const listSurveys = (collectionId: string, filters: SurveyFilters = {}) =
   if (filters.dateFrom) params.set("date_from", filters.dateFrom);
   if (filters.dateTo) params.set("date_to", filters.dateTo);
   if (filters.areaId) params.set("area_id", filters.areaId);
+  if (filters.team) params.set("team", filters.team);
   if (filters.memberId) params.set("member_id", filters.memberId);
 
   const query = params.toString();
@@ -72,6 +75,7 @@ export interface CreateSurveyInput {
   health_notes?: string;
   additional_notes?: string;
   collection_id: string;
+  team?:any
 }
 
 export const createSurvey = (input: CreateSurveyInput) =>

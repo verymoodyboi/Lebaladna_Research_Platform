@@ -13,7 +13,8 @@ const PROFILE_COLUMNS = `
   auth_id,
   bio,
   role,
-  pfp_path
+  pfp_path,
+autherized
 `;
 const getUserProfile = async (authId) => {
     const { data, error } = await supabase_1.default

@@ -8,13 +8,14 @@ const parseFilters = (query) => {
     const dateFrom = typeof query.date_from === "string" ? query.date_from : undefined;
     const dateTo = typeof query.date_to === "string" ? query.date_to : undefined;
     const areaId = typeof query.area_id === "string" ? query.area_id : undefined;
+    const team = typeof query.team === "string" ? query.team : undefined;
     const memberId = typeof query.member_id === "string" ? query.member_id : undefined;
     for (const value of [dateFrom, dateTo]) {
         if (value && Number.isNaN(Date.parse(value))) {
             throw new Error("Invalid date filter.");
         }
     }
-    return { dateFrom, dateTo, areaId, memberId };
+    return { dateFrom, dateTo, areaId, memberId, team };
 };
 const listSurveys = async (req, res) => {
     try {
@@ -45,7 +46,7 @@ const createSurvey = async (req, res) => {
         if (!profile) {
             return res.status(403).json({ message: "User profile not found." });
         }
-        const { subject_name, subject_national_id, area_id, subject_family_members_number, food_packs_number, blankets_number, training_suites, subject_mobile_number, bride, health, microfinance, microfinance_notes, health_notes, additional_notes, collection_id, } = req.body ?? {};
+        const { subject_name, subject_national_id, area_id, subject_family_members_number, food_packs_number, blankets_number, training_suites, subject_mobile_number, bride, health, microfinance, microfinance_notes, health_notes, additional_notes, collection_id, team } = req.body ?? {};
         if (typeof subject_name !== "string" || !subject_name.trim()) {
             return res.status(400).json({ message: "Subject name is required." });
         }
@@ -87,6 +88,7 @@ const createSurvey = async (req, res) => {
             additional_notes: additional_notes || null,
             collection_id,
             created_by: profile.user_id,
+            team: team
         });
         const normalizedSurvey = {
             ...survey,
