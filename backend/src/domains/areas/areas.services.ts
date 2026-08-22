@@ -14,7 +14,8 @@ const AREA_COLUMNS = `
   guide_phone_number,
   created_at,
   updated_at,
-  collection_id
+  collection_id,
+  teams
 `;
 
 export const getAreasByCollection = async (collectionId: string) => {
@@ -43,6 +44,7 @@ export interface CreateAreaInput {
   collection_id: string;
   area_name: string;
   province: string;
+  teams: any
 }
 
 export const createArea = async (input: CreateAreaInput) => {
@@ -69,6 +71,7 @@ export const createArea = async (input: CreateAreaInput) => {
       collection_id: input.collection_id,
       area_name: input.area_name,
       province: input.province,
+      teams:input.teams
     })
     .select(AREA_COLUMNS)
     .single();

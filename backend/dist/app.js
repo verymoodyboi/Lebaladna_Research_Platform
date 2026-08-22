@@ -11,6 +11,7 @@ const user_routes_1 = __importDefault(require("./domains/user/user.routes"));
 const collections_routes_1 = __importDefault(require("./domains/collections/collections.routes"));
 const surveys_routes_1 = __importDefault(require("./domains/surveys/surveys.routes"));
 const areas_routes_1 = __importDefault(require("./domains/areas/areas.routes"));
+const audio_interview_routes_1 = __importDefault(require("./domains/audio-interview/audio-interview.routes"));
 exports.app = (0, express_1.default)();
 exports.app.use((0, cors_1.default)({
     origin: "http://localhost:5173",
@@ -24,3 +25,4 @@ exports.app.use("/api/user", user_routes_1.default);
 exports.app.use("/api/collections", collections_routes_1.default);
 exports.app.use("/api/surveys", surveys_routes_1.default);
 exports.app.use("/api/areas", areas_routes_1.default);
+exports.app.use("/api/interviews", audio_interview_routes_1.default);

@@ -12,7 +12,7 @@ export const app = express();
 
 app.use(
   cors({
-    origin: "0http://localhost:5173",
+    origin: "http://localhost:5173",
 
   }),
 );
@@ -28,4 +28,4 @@ app.use("/api/user", userRoutes);
 app.use("/api/collections", collectionsRoutes);
 app.use("/api/surveys", surveysRoutes);
 app.use("/api/areas", areasRoutes);
-app.use('/interviews', interviewRoutes);
+app.use("/api/interviews", interviewRoutes);

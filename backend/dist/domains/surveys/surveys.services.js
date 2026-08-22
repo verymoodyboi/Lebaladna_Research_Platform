@@ -25,7 +25,8 @@ const SURVEY_COLUMNS = `
   collection_id,
   created_by,
   created_at,
-  creator:users(user_id, first_name, last_name)
+  creator:users(user_id, first_name, last_name),
+  team
 `;
 const emptyStats = () => ({
     cases: 0,
@@ -79,6 +80,9 @@ const getSurveysByCollection = async (collectionId, filters = {}) => {
     }
     if (filters.memberId) {
         query = query.eq("created_by", filters.memberId);
+    }
+    if (filters.team) {
+        query = query.eq("team", filters.team);
     }
     if (filters.dateFrom) {
         query = query.gte("created_at", filters.dateFrom);

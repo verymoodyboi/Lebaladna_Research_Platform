@@ -38,7 +38,7 @@ export const createArea = async (req: any, res: any) => {
       });
     }
 
-    const { collection_id, area_name, province } = req.body ?? {};
+    const { collection_id, area_name, province, teams } = req.body ?? {};
 
     if (typeof collection_id !== "string" || !collection_id) {
       return res.status(400).json({
@@ -65,6 +65,7 @@ export const createArea = async (req: any, res: any) => {
       collection_id,
       area_name: area_name.trim(),
       province: province.trim(),
+      teams: teams
     });
 
     return res.status(201).json({ area });
