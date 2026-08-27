@@ -69,11 +69,11 @@ function CollectionCard({
       className={`card-${accent} animate-riseIn group relative flex flex-col items-start overflow-hidden rounded-2xl bg-white p-5 text-left shadow-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg focus-brand`}
     >
       <span className="card-bar absolute inset-x-0 top-0 h-1" />
-      <span
+      {/* <span
         className={`icon-${accent} mb-4 flex h-11 w-11 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105`}
       >
         <Icon className="h-5 w-5" strokeWidth={2} />
-      </span>
+      </span> */}
       <h3 className="font-display text-lg font-semibold text-ink">
         {data.collection_name}
       </h3>
@@ -285,7 +285,7 @@ export default function HomePage(): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const { userInfo } = useAuth();
-  const isAdmin = userInfo?.role === "admin";
+  const isAdmin = userInfo?.role === "admin" || "manager";
 
   useEffect(() => {
     let cancelled = false;

@@ -373,6 +373,15 @@ export default function InterviewJobsSection({
     setJobs((prev) => prev.filter((j) => j.id !== job.id));
   };
 
+  const handleClearHistory = () => {
+    if (jobs.length === 0) return;
+    const confirmed = window.confirm(
+      "Clear all interview recordings from this list? This won't delete the underlying jobs, just remove them from view.",
+    );
+    if (!confirmed) return;
+    setJobs([]);
+  };
+
   const handleOpen = async (job: TrackedJob) => {
     // re-fetch once on click to guarantee freshest extracted_data before opening the modal
     try {
@@ -446,17 +455,30 @@ export default function InterviewJobsSection({
       {jobs.length === 0 ? (
         <p className="text-sm text-ink-soft">No interview recordings yet.</p>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {jobs.map((job) => (
-            <JobCard
-              key={job.id}
-              job={job}
-              onOpen={handleOpen}
-              onRetry={handleRetry}
-              onDismiss={handleDismiss}
-            />
-          ))}
-        </div>
+        <>
+          <div className="mb-2 flex items-center justify-end">
+            <button
+              type="button"
+              onClick={handleClearHistory}
+              className="focus-brand rounded-lg px-2 py-1 text-xs font-medium text-ink-soft hover:bg-sage-50 hover:text-ink"
+            >
+              Clear history
+            </button>
+          </div>
+          <div className="max-h-[28rem] overflow-y-auto pr-1">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 p-3">
+              {jobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onOpen={handleOpen}
+                  onRetry={handleRetry}
+                  onDismiss={handleDismiss}
+                />
+              ))}
+            </div>
+          </div>
+        </>
       )}
     </section>
   );
