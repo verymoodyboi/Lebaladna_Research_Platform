@@ -19,7 +19,7 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1115.0",
+    "@aws-sdk/client-s3": "^3.1119.0",
     "@aws-sdk/s3-request-presigner": "^3.1115.0",
     "@supabase/supabase-js": "^2.112.3",
     "amqplib": "^2.0.1",

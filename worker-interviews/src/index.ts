@@ -128,7 +128,7 @@ async function processJob(job: JobMessage, env: Env) {
     });
 
     // 5. delete file — only on full success
-    await env.AUDIO_BUCKET.delete(file_key);
+   // await env.AUDIO_BUCKET.delete(file_key);
   } catch (err) {
     await updateJob(env, job_id, {
       status: "failed",
