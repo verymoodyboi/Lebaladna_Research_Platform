@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, type FormEvent } from "react";
 import { Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 import supabase from "../lib/supabaseClient";
 import {
@@ -236,7 +237,7 @@ const SetupProfilePage = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+const { refreshProfile } = useAuth();
   useEffect(() => {
     const loadSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -286,8 +287,10 @@ const SetupProfilePage = () => {
         bio: bio || undefined,
         pfp_path: pfpPath,
       });
-
-      navigate("/", { replace: true });
+await refreshProfile();
+           setTimeout(() => {
+        navigate("/");
+      }, 2000);
     } catch (error) {
       console.error("Profile setup error:", error);
 
