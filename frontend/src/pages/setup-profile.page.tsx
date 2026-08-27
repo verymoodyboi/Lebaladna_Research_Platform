@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, type FormEvent } from "react";
 import { Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import { useAuth } from "../contexts/AuthContext";
 import supabase from "../lib/supabaseClient";
 import {
   createProfile,

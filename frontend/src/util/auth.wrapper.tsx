@@ -31,7 +31,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   if (status === "profileSetup") {
-    return <Navigate to="/profile/setup" replace />;
+    return <Navigate to="/auth/setup-profile" replace />;
   }
 
   if (status === "pending") {

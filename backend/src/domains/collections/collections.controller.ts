@@ -43,11 +43,14 @@ export const createCollection = async (req: any, res: any) => {
 
     const profile = await getUserProfile(req.user.id);
 
-    if (String(profile?.role ?? "").toLowerCase() !== "admin") {
-      return res.status(403).json({
-        message: "Only admins can create collections.",
-      });
-    }
+  if (
+  String(profile?.role ?? "").toLowerCase() !== "admin" &&
+  String(profile?.role ?? "").toLowerCase() !== "manager"
+) {
+  return res.status(403).json({
+    message: "Only admins or managers can create collections.",
+  });
+}
 
     const { collection_name, bg_path } = req.body ?? {};
 
