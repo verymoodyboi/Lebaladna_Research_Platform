@@ -50,7 +50,7 @@ const { data, error } = await supabase
   .from('interview_jobs')
   .select('id, status, transcript, extracted_data, error_message, created_at, completed_at')
   .eq('id', jobId)
-  .gte('created_at', oneMinuteAgo)
+  //.gte('created_at', oneMinuteAgo)
   .single();
 
   if (error) {

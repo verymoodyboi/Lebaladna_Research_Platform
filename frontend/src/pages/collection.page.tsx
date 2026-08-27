@@ -602,6 +602,7 @@ function FillSurveyDialog({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [addAreaOpen, setAddAreaOpen] = useState(false);
+  const [audioUnavailable, setAudioUnavailable] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -618,9 +619,17 @@ function FillSurveyDialog({
       setSuiteCounts(initialSuiteCounts ?? {});
       setError("");
       setAddAreaOpen(false);
+      setAudioUnavailable(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, initialData, initialSuiteCounts, currentAreaId, currentTeam]);
+  }, [
+    open,
+    initialData,
+    initialSuiteCounts,
+    currentAreaId,
+    currentTeam,
+    sourceJobId,
+  ]);
 
   const availableTeams = useMemo(() => {
     const area = areas.find((a) => a.area_id === form.area_id);
@@ -787,6 +796,32 @@ function FillSurveyDialog({
                   {userInfo?.first_name} {userInfo?.last_name}
                 </div>
               </div>
+
+              {/* Original recording — only present for surveys created from an interview job */}
+              {sourceJobId && (
+                <div className="flex flex-col gap-1.5 rounded-xl bg-sage-50 p-3">
+                  <span className="text-sm font-medium text-ink">
+                    Original recording
+                  </span>
+
+                  {audioUnavailable ? (
+                    <p className="text-xs text-ink-soft">
+                      The audio for this interview is no longer available.
+                    </p>
+                  ) : (
+                    <audio
+                      key={sourceJobId}
+                      controls
+                      preload="none"
+                      src={`https://interviews.try-yugen.com/interviews/${sourceJobId}.mp3`}
+                      onError={() => setAudioUnavailable(true)}
+                      className="w-full"
+                    >
+                      Your browser does not support audio playback.
+                    </audio>
+                  )}
+                </div>
+              )}
 
               {/* Subject information */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
