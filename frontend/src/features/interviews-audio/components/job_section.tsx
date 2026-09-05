@@ -180,6 +180,8 @@ export default function InterviewJobsSection({
   });
   const [recording, setRecording] = useState(false);
   const [recordError, setRecordError] = useState("");
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+  const [openError, setOpenError] = useState("");
 
   // Persist tracked (real) jobs only — not the transient local-failure rows.
   useEffect(() => {
@@ -375,11 +377,12 @@ export default function InterviewJobsSection({
 
   const handleClearHistory = () => {
     if (jobs.length === 0) return;
-    const confirmed = window.confirm(
-      "Clear all interview recordings from this list? This won't delete the underlying jobs, just remove them from view.",
-    );
-    if (!confirmed) return;
+    setConfirmClearOpen(true);
+  };
+
+  const confirmClearHistory = () => {
     setJobs([]);
+    setConfirmClearOpen(false);
   };
 
   const handleOpen = async (job: TrackedJob) => {
@@ -388,7 +391,7 @@ export default function InterviewJobsSection({
       const fresh = await getInterviewJob(job.id);
       onReviewJob(fresh);
     } catch (err) {
-      window.alert(
+      setOpenError(
         err instanceof Error ? err.message : "Unable to load job details.",
       );
     }
@@ -410,7 +413,7 @@ export default function InterviewJobsSection({
           <input
             ref={fileInputRef}
             type="file"
-            accept="audio/*"
+            accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.caf,.amr,.mp4"
             multiple
             className="hidden"
             onChange={(e) => handleFilesSelected(e.target.files)}
@@ -452,6 +455,20 @@ export default function InterviewJobsSection({
         </div>
       )}
 
+      {openError && (
+        <div className="alert-error mb-4 flex items-start justify-between gap-3 rounded-xl px-4 py-3 text-sm">
+          <span>{openError}</span>
+          <button
+            type="button"
+            onClick={() => setOpenError("")}
+            className="focus-brand shrink-0 rounded-full p-0.5 hover:bg-black/5"
+            aria-label="Dismiss"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+
       {jobs.length === 0 ? (
         <p className="text-sm text-ink-soft">No interview recordings yet.</p>
       ) : (
@@ -479,6 +496,48 @@ export default function InterviewJobsSection({
             </div>
           </div>
         </>
+      )}
+
+      {confirmClearOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setConfirmClearOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="clear-history-title"
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-lg"
+          >
+            <h3
+              id="clear-history-title"
+              className="text-base font-semibold text-ink"
+            >
+              Clear interview history?
+            </h3>
+            <p className="mt-1.5 text-sm text-ink-soft">
+              This removes all recordings from this list. It won&apos;t
+              delete the underlying jobs, just remove them from view.
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmClearOpen(false)}
+                className="btn-secondary focus-brand rounded-xl px-3.5 py-2 text-sm font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmClearHistory}
+                className="focus-brand rounded-xl bg-red-600 px-3.5 py-2 text-sm font-semibold text-white hover:bg-red-700"
+              >
+                Clear history
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );

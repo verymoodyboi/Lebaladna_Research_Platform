@@ -1197,7 +1197,7 @@ function StatCard({
 
 function SurveyTotals({
   stats,
-  title = "Survey totals",
+  title = "Survey stats",
 }: {
   stats: SurveyStats;
   title?: string;
@@ -1218,6 +1218,11 @@ function SurveyTotals({
         <StatCard label="Family members" value={stats.family_members} />
         <StatCard label="Food packs" value={stats.food_packs} />
         <StatCard label="Blankets" value={stats.blankets} />
+      <StatCard
+          label="Blankets/Case"
+            value={(stats.blankets / stats.cases || 0).toFixed(2)}
+        />
+
         <StatCard label="Health" value={stats.health_cases} />
         <StatCard label="Brides" value={stats.brides} />
         <StatCard label="Microfinance" value={stats.microfinance_cases} />
@@ -1825,8 +1830,8 @@ export default function CollectionPage(): React.ReactElement {
                 stats={totalStats}
                 title={
                   dateFrom || dateTo || areaId || teamFilter || memberId
-                    ? "Filtered survey totals"
-                    : "Survey totals"
+                    ? "Filtered survey stats"
+                    : "Survey stats"
                 }
               />
 
