@@ -5,7 +5,7 @@ export async function transcribeAudio(
 ): Promise<string> {
   const form = new FormData();
   form.append("file", audio, filename);
-  form.append("model", "whisper-1");
+  form.append("model", "gpt-4o-mini-transcribe");
 
   const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
     method: "POST",
@@ -14,7 +14,7 @@ export async function transcribeAudio(
   });
 
   if (!res.ok) {
-    throw new Error(`Whisper failed (${res.status}): ${await res.text()}`);
+    throw new Error(`Transcription failed (${res.status}): ${await res.text()}`);
   }
   const data = await res.json<{ text: string }>();
   return data.text;

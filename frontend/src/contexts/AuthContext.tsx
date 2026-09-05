@@ -38,6 +38,7 @@ interface AuthContextType {
   userInfo: UserInfo | null;
   username: string;
   getAccessToken: () => Promise<string | null>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -47,6 +48,7 @@ const AuthContext = createContext<AuthContextType>({
   userInfo: null,
   username: "",
   getAccessToken: async () => null,
+  refreshProfile: async () => {},
 });
 
 interface AuthProviderProps {
@@ -166,6 +168,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
   }, [loadProfile]);
 
+  const refreshProfile = useCallback(async () => {
+    const {
+      data: { session: currentSession },
+    } = await supabase.auth.getSession();
+
+    if (currentSession) {
+      await loadProfile(currentSession);
+    }
+  }, [loadProfile]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -175,6 +187,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         userInfo,
         username: userInfo?.username ?? "",
         getAccessToken,
+        refreshProfile, // NEW
       }}
     >
       {children}
