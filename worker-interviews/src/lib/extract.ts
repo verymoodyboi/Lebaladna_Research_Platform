@@ -68,7 +68,7 @@ const SURVEY_SCHEMA = {
 };
 
 const SYSTEM_PROMPT = `
-Extract beneficiary survey data from the interview transcript. Only use
+Extract beneficiary survey data from the interview summery transcript. Only use
 information explicitly stated. The transcript may mix Arabic and English,
 digits and spoken-word numbers, in any order.
 
@@ -81,9 +81,11 @@ Boolean fields (bride, health, microfinance) — these are the fields most
 likely to be under-filled, so apply this rule strictly:
 - health must be true whenever health_notes will be non-null (any health
   issue, condition, request, or need is mentioned) — never output
-  health_notes with content while health is null or false.
-- microfinance must be true whenever microfinance_notes will be non-null,
-  by the same rule.
+  health_notes with content while health is null or false. If health 
+  notes are mentioned, put those notes in the health notes field.
+- microfinance_notes should include anything related to a small project a beneficiary may operate.
+  microfinance must be true whenever microfinance_notes will be non-null,
+  by the same rule. 
 - bride must be true if the transcript indicates marriage-related support is
   needed (e.g. an upcoming wedding, bridal needs), false if marriage support
   is explicitly discussed and not needed, and null only if marriage is never
@@ -91,6 +93,10 @@ likely to be under-filled, so apply this rule strictly:
 - Never leave a boolean null purely out of caution if the transcript contains
   any relevant statement — a mention, a request, or a need described in
   plain language (not just an explicit yes/no) is sufficient evidence.
+
+
+
+
 
 Training suites (training_suites field):
 - Valid sizes are exactly: ${TRAINING_SUITE_SIZES.join(", ")}. A size is a
@@ -113,6 +119,13 @@ For every other field: leave it null only after specifically checking the
 transcript for that field's topic and finding no mention. Do not guess or
 invent values that aren't explicitly stated — but do not default to null
 without having actually checked, either.
+
+For phone number and national ID be catious of how many times a digit is repeated. 
+Be aware that the national ID is supposed to be 14 digits and phone number is suposed to be 11 digits.
+normalize the ID and phone number to english digits after extraction.
+
+Make sure to extract  subject_family_members_number, food_packs_number", "blankets_number"
+
 `.trim();
 
 export async function extractSurveyData(env: Env, transcript: string) {

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Mic,
-  Square,
+  Pause,
   Upload,
   RefreshCw,
   X,
@@ -40,7 +40,7 @@ const STATUS_LABEL: Record<ClientStatus, string> = {
   transcribing: "Transcribing…",
   transcribed: "Transcribed",
   extracting: "Extracting data…",
-  completed: "Ready to review",
+  completed: "Click to submit →",
   failed: "Failed",
   upload_failed: "Upload failed",
 };
@@ -101,9 +101,9 @@ function JobCard({
         {inProgress && (
           <Loader2 className="h-3.5 w-3.5 animate-spin text-ink-soft" />
         )}
-        {job.clientStatus === "completed" && (
+        {/* {job.clientStatus === "completed" && (
           <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-        )}
+        )} */}
         {(job.clientStatus === "failed" ||
           job.clientStatus === "upload_failed") && (
           <AlertCircle className="h-3.5 w-3.5 text-red-600" />
@@ -142,11 +142,11 @@ function JobCard({
         </button>
       )}
 
-      {job.clientStatus === "completed" && (
+      {/* {job.clientStatus === "completed" && (
         <span className="text-xs font-medium text-emerald-700">
-          Click to review &amp; fill survey →
+          Click to submit →
         </span>
-      )}
+      )} */}
     </div>
   );
 }
@@ -164,6 +164,7 @@ export default function InterviewJobsSection({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const cancelledRef = useRef(false);
 
   const [jobs, setJobs] = useState<TrackedJob[]>(() => {
     try {
@@ -179,6 +180,7 @@ export default function InterviewJobsSection({
     }
   });
   const [recording, setRecording] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [recordError, setRecordError] = useState("");
 
   // Persist tracked (real) jobs only — not the transient local-failure rows.
@@ -323,6 +325,12 @@ export default function InterviewJobsSection({
       };
       recorder.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
+
+        if (cancelledRef.current) {
+          cancelledRef.current = false;
+          return;
+        }
+
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         void trackNewUpload(
           blob,
@@ -332,15 +340,37 @@ export default function InterviewJobsSection({
       recorder.start();
       mediaRecorderRef.current = recorder;
       setRecording(true);
+      setPaused(false);
     } catch {
       setRecordError("Microphone access was denied or is unavailable.");
     }
+  };
+
+  const pauseRecording = () => {
+    if (mediaRecorderRef.current?.state !== "recording") return;
+    mediaRecorderRef.current.pause();
+    setPaused(true);
+  };
+
+  const resumeRecording = () => {
+    if (mediaRecorderRef.current?.state !== "paused") return;
+    mediaRecorderRef.current.resume();
+    setPaused(false);
   };
 
   const stopRecording = () => {
     mediaRecorderRef.current?.stop();
     mediaRecorderRef.current = null;
     setRecording(false);
+    setPaused(false);
+  };
+
+  const cancelRecording = () => {
+    cancelledRef.current = true;
+    mediaRecorderRef.current?.stop();
+    mediaRecorderRef.current = null;
+    setRecording(false);
+    setPaused(false);
   };
 
   const handleRetry = async (job: TrackedJob) => {
@@ -395,18 +425,9 @@ export default function InterviewJobsSection({
   };
 
   return (
-    <section className="mt-8">
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="font-display text-xl font-semibold text-ink">
-            Interview recordings
-          </h2>
-          <p className="text-sm text-ink-soft">
-            Upload or record an interview to auto-fill a survey from it.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
+    <section className="mt-2 ">
+      <div className="mb-4 flex flex-wrap items-end justify-center gap-3">
+        <div className="flex items-center gap-3">
           <input
             ref={fileInputRef}
             type="file"
@@ -415,33 +436,68 @@ export default function InterviewJobsSection({
             className="hidden"
             onChange={(e) => handleFilesSelected(e.target.files)}
           />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="btn-secondary focus-brand flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"
-          >
-            <Upload className="h-4 w-4" />
-            Upload audio
-          </button>
+          {!recording && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full btn-secondary focus-brand flex min-w-[3.5rem] items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold"
+            >
+              <Upload className="h-4 w-4" />
+            </button>
+          )}
 
           {!recording ? (
             <button
               type="button"
               onClick={startRecording}
-              className="btn-primary focus-brand flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"
+              className="w-full  btn-primary focus-brand flex min-w-[3.5rem] items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold"
             >
               <Mic className="h-4 w-4" />
-              Record
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={stopRecording}
-              className="focus-brand flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
-            >
-              <Square className="h-4 w-4" />
-              Stop
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={cancelRecording}
+                aria-label="Cancel recording"
+                title="Cancel"
+                className="btn-secondary focus-brand flex min-w-[3.5rem] items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              {!paused ? (
+                <button
+                  type="button"
+                  onClick={pauseRecording}
+                  aria-label="Pause recording"
+                  title="Pause"
+                  className="btn-secondary focus-brand flex min-w-[3.5rem] items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold"
+                >
+                  <Pause className="h-4 w-4" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={resumeRecording}
+                  aria-label="Resume recording"
+                  title="Resume"
+                  className="btn-secondary focus-brand flex min-w-[3.5rem] items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold"
+                >
+                  <Mic className="h-4 w-4" />
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={stopRecording}
+                aria-label="Stop and submit recording"
+                title="Submit"
+                className="focus-brand flex h-14 w-14 items-center justify-center rounded-full bg-red-600 shadow-sm hover:bg-red-700"
+              >
+                <span className="block h-5 w-5 rounded-sm bg-white" />
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -453,7 +509,7 @@ export default function InterviewJobsSection({
       )}
 
       {jobs.length === 0 ? (
-        <p className="text-sm text-ink-soft">No interview recordings yet.</p>
+        <></>
       ) : (
         <>
           <div className="mb-2 flex items-center justify-end">
