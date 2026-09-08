@@ -1533,7 +1533,7 @@ function StatCard({
 
 function SurveyTotals({
   stats,
-  title = "Survey totals",
+  title = "Survey stats",
 }: {
   stats: SurveyStats;
   title?: string;
@@ -1554,9 +1554,9 @@ function SurveyTotals({
         <StatCard label="Family members" value={stats.family_members} />
         <StatCard label="Food packs" value={stats.food_packs} />
         <StatCard label="Blankets" value={stats.blankets} />
-        <StatCard
+      <StatCard
           label="Blankets/Case"
-          value={stats.blankets / stats.cases || 0}
+            value={(stats.blankets / stats.cases || 0).toFixed(2)}
         />
 
         <StatCard label="Health" value={stats.health_cases} />
