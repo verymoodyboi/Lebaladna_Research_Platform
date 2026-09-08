@@ -1,6 +1,18 @@
 import React, { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Plus, X, Minus, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  X,
+  Minus,
+  Trash2,
+  FileEdit,
+  MapPin,
+  Users,
+  ChevronDown,
+  SlidersHorizontal,
+  BarChart3,
+} from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import Layout from "../layouts/Layout";
 import {
@@ -101,10 +113,12 @@ function SurveyRow({
             {survey.area || "—"}
             {survey.team ? ` · ${survey.team}` : ""}
           </span>
-          {survey.subject_mobile_number && (
+          {survey.creator && (
             <>
               <span aria-hidden="true">•</span>
-              <span>{survey.subject_mobile_number}</span>
+              <span>
+                {survey.creator.first_name} {survey.creator.last_name}
+              </span>
             </>
           )}
         </div>
@@ -118,7 +132,9 @@ function SurveyRow({
           {survey.team ? ` · ${survey.team}` : ""}
         </span>
         <span className="text-ink-soft">
-          {survey.subject_mobile_number || "—"}
+          {survey.creator
+            ? `${survey.creator.first_name ?? ""} ${survey.creator.last_name ?? ""}`.trim()
+            : ""}
         </span>
         <span className="text-ink-soft">
           {survey.subject_family_members_number ?? "—"} members
@@ -1174,6 +1190,326 @@ function FillSurveyDialog({
   );
 }
 
+/* ---------- Add survey dialog (upload or fill manually) ---------- */
+
+function AddSurveyDialog({
+  open,
+  collectionId,
+  onClose,
+  onFillManually,
+  onReviewJob,
+}: {
+  open: boolean;
+  collectionId: string;
+  onClose: () => void;
+  onFillManually: () => void;
+  onReviewJob: (job: InterviewJob) => void;
+}): React.ReactElement | null {
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/40 px-4 py-4"
+      onClick={onClose}
+      style={{ overflow: "hidden" }}
+    >
+      <div
+        className="auth-card relative mx-auto flex w-full max-w-xl flex-col rounded-3xl bg-white shadow-sm"
+        style={{
+          height: "calc(100dvh - 2rem)",
+          maxHeight: "calc(100dvh - 2rem)",
+          overflow: "hidden",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className="min-h-0 flex-1 overflow-y-scroll p-8"
+          style={{
+            overflowY: "scroll",
+            WebkitOverflowScrolling: "touch",
+            overscrollBehavior: "contain",
+          }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            className="focus-brand absolute right-5 top-5 rounded-full p-1 text-ink-soft hover:bg-sage-50 hover:text-ink"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+
+          <h2 className="font-display text-2xl font-semibold text-ink">
+            Add a survey
+          </h2>
+
+          <div className="my-6 mb-0 flex items-center gap-3">
+            <div className="h-px flex-1 bg-sage-200" />
+            <span className="text-center text-xs font-semibold uppercase text-ink-soft">
+              Fill survey manually{" "}
+            </span>
+            <div className="h-px flex-1 bg-sage-200" />
+          </div>
+
+          <div className="flex flex-col">
+            <button
+              type="button"
+              onClick={onFillManually}
+              className="mt-2 btn-primary focus-brand flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-semibold shadow-sm sm:w-auto"
+            >
+              <FileEdit className="h-5 w-5" />
+            </button>
+            <div className="my-6 mb-0 mt-8 flex items-center gap-3">
+              <div className="h-px flex-1 bg-sage-200" />
+              <span className="text-center text-xs font-semibold uppercase text-ink-soft">
+                or Summerize the the survey info in a voice note.
+              </span>
+              <div className="h-px flex-1 bg-sage-200" />
+            </div>
+
+            <div className="">
+              <InterviewJobsSection
+                collectionId={collectionId}
+                onReviewJob={onReviewJob}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Floating add-survey button ---------- */
+
+function AddSurveyFab({
+  onClick,
+}: {
+  onClick: () => void;
+}): React.ReactElement {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Add a survey"
+      title="Add a survey"
+      className="btn-primary focus-brand relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
+    >
+      <Plus className="h-6 w-6" />
+    </button>
+  );
+}
+
+/* ---------- Floating current area/team island (liquid-glass) ---------- */
+
+type GlassOption = { value: string; label: string };
+
+function GlassPillSegment({
+  icon,
+  label,
+  value,
+  placeholder,
+  disabled,
+  options,
+  isOpen,
+  onToggle,
+  onSelect,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  placeholder: string;
+  disabled?: boolean;
+  options: GlassOption[];
+  isOpen: boolean;
+  onToggle: () => void;
+  onSelect: (value: string) => void;
+}): React.ReactElement {
+  return (
+    <div className="relative flex-1">
+      <button
+        type="button"
+        onClick={onToggle}
+        disabled={disabled}
+        className="focus-brand flex w-full items-center gap-1.5 rounded-full px-3 py-2 text-left transition disabled:cursor-not-allowed disabled:opacity-50 sm:px-3.5"
+      >
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/60 text-emerald-700 shadow-[0_1px_2px_rgba(15,23,42,0.15)]">
+          {icon}
+        </span>
+        <span className="flex min-w-0 flex-col leading-tight">
+          <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-ink-soft/90">
+            {label}
+          </span>
+          <span className="max-w-[5rem] truncate text-xs font-semibold text-ink sm:max-w-[8.5rem] sm:text-sm">
+            {value || placeholder}
+          </span>
+        </span>
+        <ChevronDown
+          className={`ml-auto h-3.5 w-3.5 shrink-0 text-ink-soft transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute bottom-full left-1/2 z-50 mb-3 w-56 -translate-x-1/2 overflow-hidden rounded-2xl border border-black/5 bg-white py-1.5 shadow-[0_16px_40px_rgba(15,23,42,0.22)]">
+          <div className="max-h-60 overflow-y-auto px-1.5">
+            {options.length === 0 ? (
+              <p className="px-3 py-2 text-xs text-ink-soft">
+                Nothing to select.
+              </p>
+            ) : (
+              options.map((opt) => (
+                <button
+                  key={opt.value || "none"}
+                  type="button"
+                  onClick={() => onSelect(opt.value)}
+                  className={`focus-brand block w-full truncate rounded-xl px-3 py-2 text-left text-sm transition hover:bg-sage-50 ${
+                    opt.value === value
+                      ? "bg-sage-50 font-semibold text-ink"
+                      : "text-ink"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CurrentContextIsland({
+  areas,
+  currentAreaId,
+  currentAreaTeams,
+  currentTeam,
+  onAreaChange,
+  onTeamChange,
+  openMenu,
+  onToggleMenu,
+}: {
+  areas: Area[];
+  currentAreaId: string;
+  currentAreaTeams: string[];
+  currentTeam: string;
+  onAreaChange: (areaId: string) => void;
+  onTeamChange: (team: string) => void;
+  openMenu: "area" | "team" | null;
+  onToggleMenu: (menu: "area" | "team") => void;
+}): React.ReactElement {
+  const currentAreaName =
+    areas.find((a) => a.area_id === currentAreaId)?.area_name || "";
+
+  const areaOptions: GlassOption[] = [
+    { value: "", label: "No default area" },
+    ...areas.map((area) => ({ value: area.area_id, label: area.area_name })),
+  ];
+
+  const teamOptions: GlassOption[] = [
+    {
+      value: "",
+      label: currentAreaId
+        ? currentAreaTeams.length === 0
+          ? "No teams for this area"
+          : "No default team"
+        : "Select an area first",
+    },
+    ...currentAreaTeams.map((team) => ({ value: team, label: team })),
+  ];
+
+  return (
+    <div className="relative flex min-w-0 items-stretch rounded-full border border-white/60 bg-white/35 shadow-[0_8px_32px_rgba(15,23,42,0.18)] backdrop-blur-2xl backdrop-saturate-150 supports-[backdrop-filter]:bg-white/25">
+      <span className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-b from-white/70 via-white/10 to-transparent" />
+      <span className="pointer-events-none absolute inset-x-3 top-0 h-px bg-white/80" />
+
+      <div className="relative z-10 flex min-w-0 items-stretch">
+        <GlassPillSegment
+          icon={<MapPin className="h-3.5 w-3.5" />}
+          label="Area"
+          value={currentAreaName}
+          placeholder="No area"
+          options={areaOptions}
+          isOpen={openMenu === "area"}
+          onToggle={() => onToggleMenu("area")}
+          onSelect={(val) => onAreaChange(val)}
+        />
+
+        <div className="my-2 w-px shrink-0 bg-white/60" />
+
+        <GlassPillSegment
+          icon={<Users className="h-3.5 w-3.5" />}
+          label="Team"
+          value={currentTeam}
+          placeholder="No team"
+          disabled={currentAreaTeams.length === 0}
+          options={teamOptions}
+          isOpen={openMenu === "team"}
+          onToggle={() => onToggleMenu("team")}
+          onSelect={(val) => onTeamChange(val)}
+        />
+      </div>
+    </div>
+  );
+}
+
+function FloatingActionDock({
+  areas,
+  currentAreaId,
+  currentAreaTeams,
+  currentTeam,
+  onAreaChange,
+  onTeamChange,
+  onAddSurvey,
+}: {
+  areas: Area[];
+  currentAreaId: string;
+  currentAreaTeams: string[];
+  currentTeam: string;
+  onAreaChange: (areaId: string) => void;
+  onTeamChange: (team: string) => void;
+  onAddSurvey: () => void;
+}): React.ReactElement {
+  const [openMenu, setOpenMenu] = useState<"area" | "team" | null>(null);
+
+  return (
+    <>
+      {openMenu && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setOpenMenu(null)}
+          aria-hidden="true"
+        />
+      )}
+
+      <div className="fixed inset-x-0 bottom-6 z-40 flex items-center justify-center gap-3 px-4">
+        <CurrentContextIsland
+          areas={areas}
+          currentAreaId={currentAreaId}
+          currentAreaTeams={currentAreaTeams}
+          currentTeam={currentTeam}
+          onAreaChange={(val) => {
+            onAreaChange(val);
+            setOpenMenu(null);
+          }}
+          onTeamChange={(val) => {
+            onTeamChange(val);
+            setOpenMenu(null);
+          }}
+          openMenu={openMenu}
+          onToggleMenu={(menu) =>
+            setOpenMenu((current) => (current === menu ? null : menu))
+          }
+        />
+
+        <AddSurveyFab onClick={onAddSurvey} />
+      </div>
+    </>
+  );
+}
+
 /* ---------- Page ---------- */
 
 function StatCard({
@@ -1226,6 +1562,7 @@ function SurveyTotals({
         <StatCard label="Health" value={stats.health_cases} />
         <StatCard label="Brides" value={stats.brides} />
         <StatCard label="Microfinance" value={stats.microfinance_cases} />
+
         <StatCard
           label="Training suites"
           value={Object.values(stats.training_suites).reduce(
@@ -1326,6 +1663,111 @@ function CollectionStats({
   );
 }
 
+/* ---------- Filters dropdown (icon button + panel) ---------- */
+
+function FiltersDropdownButton({
+  isOpen,
+  onToggle,
+  onClose,
+  hasActiveFilters,
+  children,
+}: {
+  isOpen: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+  hasActiveFilters: boolean;
+  children: React.ReactNode;
+}): React.ReactElement {
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        className="focus-brand flex flex-col items-center gap-1 rounded-2xl px-2 py-1 text-xs font-medium text-ink-soft transition hover:text-ink"
+      >
+        <span
+          className={`relative flex h-9 w-9 items-center justify-center rounded-xl transition ${
+            isOpen
+              ? "bg-emerald-600 text-white"
+              : "bg-sage-50 text-ink hover:bg-sage-100"
+          }`}
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          {hasActiveFilters && (
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+          )}
+        </span>
+        Filters
+      </button>
+
+      {isOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            onClick={onClose}
+            aria-hidden="true"
+          />
+          <div className="absolute right-0 z-50 mt-2 w-[calc(100vw-2rem)] max-w-sm rounded-2xl border border-black/5 bg-white p-4 shadow-[0_16px_40px_rgba(15,23,42,0.18)] sm:w-96">
+            {children}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ---------- Collection totals dialog ---------- */
+
+function SurveyTotalsDialog({
+  open,
+  onClose,
+  stats,
+  title,
+}: {
+  open: boolean;
+  onClose: () => void;
+  stats: SurveyStats;
+  title: string;
+}): React.ReactElement | null {
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/40 px-4 py-4"
+      onClick={onClose}
+      style={{ overflow: "hidden" }}
+    >
+      <div
+        className="auth-card relative mx-auto flex w-full max-w-xl flex-col rounded-3xl bg-white shadow-sm"
+        style={{
+          maxHeight: "calc(100dvh - 2rem)",
+          overflow: "hidden",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className="min-h-0 flex-1 overflow-y-auto p-6"
+          style={{
+            WebkitOverflowScrolling: "touch",
+            overscrollBehavior: "contain",
+          }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            className="focus-brand absolute right-5 top-5 rounded-full p-1 text-ink-soft hover:bg-sage-50 hover:text-ink"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <SurveyTotals stats={stats} title={title} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CollectionPage(): React.ReactElement {
   const { collectionId = "" } = useParams();
   const navigate = useNavigate();
@@ -1414,7 +1856,10 @@ export default function CollectionPage(): React.ReactElement {
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Survey | null>(null);
   const [fillOpen, setFillOpen] = useState(false);
+  const [addSurveyOpen, setAddSurveyOpen] = useState(false);
   const [addAreaOpen, setAddAreaOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [totalsOpen, setTotalsOpen] = useState(false);
   const [interviewPrefill, setInterviewPrefill] = useState<{
     jobId: string;
     data: Partial<typeof BLANK_SURVEY_FORM>;
@@ -1443,6 +1888,7 @@ export default function CollectionPage(): React.ReactElement {
         ).training_suites,
       ),
     });
+    setAddSurveyOpen(false);
     setFillOpen(true);
   };
 
@@ -1594,66 +2040,6 @@ export default function CollectionPage(): React.ReactElement {
           </div>
         </section>
 
-        <section className="mb-6 rounded-2xl border-2 border-emerald-200 bg-sage-50 p-4 shadow-sm">
-          <div className="mb-3 flex items-center gap-2">
-            <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-ink">
-              Working context
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-semibold uppercase text-ink-soft">
-                Current area
-              </span>
-              <select
-                value={currentAreaId}
-                onChange={(e) => setCurrentArea(e.target.value)}
-                className="input-brand focus-brand rounded-xl px-3.5 py-2.5 text-sm font-medium"
-              >
-                <option value="">No default area</option>
-                {areas.map((area) => (
-                  <option key={area.area_id} value={area.area_id}>
-                    {area.area_name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-semibold uppercase text-ink-soft">
-                Current team
-              </span>
-              <select
-                value={currentTeam}
-                onChange={(e) => setCurrentTeam(e.target.value)}
-                disabled={currentAreaTeams.length === 0}
-                className="input-brand focus-brand rounded-xl px-3.5 py-2.5 text-sm font-medium"
-              >
-                <option value="">
-                  {currentAreaId
-                    ? currentAreaTeams.length === 0
-                      ? "No teams for this area"
-                      : "No default team"
-                    : "Select an area first"}
-                </option>
-                {currentAreaTeams.map((team) => (
-                  <option key={team} value={team}>
-                    {team}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <p className="mt-3 text-xs text-ink-soft">
-            Surveys you fill from here on — manual or from an audio interview —
-            start pre-filled with this area and team. You can still change them
-            per survey.
-          </p>
-        </section>
-
         {error && !loading && (
           <div className="alert-error mb-5 rounded-xl px-4 py-3 text-sm">
             {error}
@@ -1664,191 +2050,188 @@ export default function CollectionPage(): React.ReactElement {
           <p className="text-sm text-ink-soft">Loading collection...</p>
         ) : (
           <>
-            {/* {collection && <CollectionStats collection={collection} />} */}
-
-            {/* Add a survey — manual entry and the audio interview flow are
-                grouped together in one card so both ways of starting a
-                survey are visually close to each other. */}
-            <section className="mb-8 rounded-2xl border border-sage-200 bg-white p-5 shadow-sm">
-              <h2 className="font-display text-xl font-semibold text-ink">
-                Add a survey
-              </h2>
-              <p className="mb-4 text-sm text-ink-soft">
-                Fill one in on the spot, or record an interview and review it
-                once it's transcribed.
-              </p>
-
-              {/* Stacked at every breakpoint (not side-by-side on desktop):
-                  InterviewJobsSection lays its own header out with
-                  justify-between (title/description left, Upload/Record
-                  buttons pinned right), so squeezing it into a flex-1
-                  sibling next to the manual button was stretching that
-                  internal row across the leftover width — pushing the
-                  audio buttons far from "Fill survey manually" and leaving
-                  the job card floating underneath, disconnected from
-                  either. A divider keeps the two options visually
-                  distinct without relying on side-by-side space. */}
-              <div className="flex flex-col gap-6">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setInterviewPrefill(null);
-                    setFillOpen(true);
-                  }}
-                  className="btn-primary focus-brand flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-semibold shadow-sm sm:w-auto"
-                >
-                  <Plus className="h-4 w-4" />
-                  Fill survey manually
-                </button>
-
-                <div className="border-t border-sage-100 pt-6">
-                  <InterviewJobsSection
-                    collectionId={collectionId}
-                    onReviewJob={handleReviewInterviewJob}
-                  />
-                </div>
-              </div>
-            </section>
-
-            {/* Survey records — kept visually separate from the "Add a
-                survey" card above. */}
+            {/* Survey records */}
             <section className="mt-8">
-              <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h2 className="font-display text-xl font-semibold text-ink">
                     Survey records
                   </h2>
                   <p className="text-sm text-ink-soft">
-                    Filter by date, area, team, or the member who filled the
-                    survey.
+                    {totalStats.cases} case
+                    {totalStats.cases === 1 ? "" : "s"}
+                    {dateFrom || dateTo || areaId || teamFilter || memberId
+                      ? " matching your filters"
+                      : " recorded"}
                   </p>
                 </div>
 
-                {(dateFrom || dateTo || areaId || teamFilter || memberId) && (
+                <div className="flex items-center gap-2">
+                  {(dateFrom || dateTo || areaId || teamFilter || memberId) && (
+                    <button
+                      type="button"
+                      onClick={clearFilters}
+                      className="btn-secondary focus-brand rounded-xl px-3 py-2 text-sm font-medium"
+                    >
+                      Clear filters
+                    </button>
+                  )}
+
                   <button
                     type="button"
-                    onClick={clearFilters}
-                    className="btn-secondary focus-brand rounded-xl px-3 py-2 text-sm font-medium"
+                    onClick={() => setTotalsOpen(true)}
+                    className="btn-secondary focus-brand flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold"
                   >
-                    Clear filters
+                    <BarChart3 className="h-4 w-4" />
+                    View breakdown
                   </button>
-                )}
+
+                  <FiltersDropdownButton
+                    isOpen={filtersOpen}
+                    onToggle={() => setFiltersOpen((o) => !o)}
+                    onClose={() => setFiltersOpen(false)}
+                    hasActiveFilters={Boolean(
+                      dateFrom || dateTo || areaId || teamFilter || memberId,
+                    )}
+                  >
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="text-sm font-semibold text-ink">
+                        Filter survey records
+                      </span>
+                      {(dateFrom ||
+                        dateTo ||
+                        areaId ||
+                        teamFilter ||
+                        memberId) && (
+                        <button
+                          type="button"
+                          onClick={clearFilters}
+                          className="focus-brand text-xs font-medium text-ink-soft hover:text-ink"
+                        >
+                          Clear all
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <label className="flex flex-col gap-1.5">
+                        <span className="text-xs font-semibold uppercase text-ink-soft">
+                          From
+                        </span>
+                        <input
+                          type="date"
+                          value={dateFrom}
+                          max={dateTo || undefined}
+                          onChange={(e) => setDateFrom(e.target.value)}
+                          className="input-brand focus-brand rounded-xl px-3.5 py-2.5 text-sm"
+                        />
+                      </label>
+
+                      <label className="flex flex-col gap-1.5">
+                        <span className="text-xs font-semibold uppercase text-ink-soft">
+                          To
+                        </span>
+                        <input
+                          type="date"
+                          value={dateTo}
+                          min={dateFrom || undefined}
+                          onChange={(e) => setDateTo(e.target.value)}
+                          className="input-brand focus-brand rounded-xl px-3.5 py-2.5 text-sm"
+                        />
+                      </label>
+
+                      <label className="flex flex-col gap-1.5">
+                        <span className="text-xs font-semibold uppercase text-ink-soft">
+                          Area
+                        </span>
+                        <select
+                          value={areaId}
+                          onChange={(e) => {
+                            const newAreaId = e.target.value;
+                            setAreaId(newAreaId);
+                            // The team filter is scoped to the selected
+                            // area, so clear it whenever the area filter
+                            // changes.
+                            setTeamFilter("");
+                          }}
+                          className="input-brand focus-brand rounded-xl px-3.5 py-2.5 text-sm"
+                        >
+                          <option value="">All areas</option>
+                          {areas.map((area) => (
+                            <option key={area.area_id} value={area.area_id}>
+                              {area.area_name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label className="flex flex-col gap-1.5">
+                        <span className="text-xs font-semibold uppercase text-ink-soft">
+                          Team
+                        </span>
+                        <select
+                          value={teamFilter}
+                          onChange={(e) => setTeamFilter(e.target.value)}
+                          disabled={filterAreaTeams.length === 0}
+                          className="input-brand focus-brand rounded-xl px-3.5 py-2.5 text-sm"
+                        >
+                          <option value="">
+                            {filterAreaTeams.length === 0
+                              ? "No teams"
+                              : "All teams"}
+                          </option>
+                          {filterAreaTeams.map((team) => (
+                            <option key={team} value={team}>
+                              {team}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label className="flex flex-col gap-1.5 sm:col-span-2">
+                        <span className="text-xs font-semibold uppercase text-ink-soft">
+                          Member
+                        </span>
+                        <select
+                          value={memberId}
+                          onChange={(e) => setMemberId(e.target.value)}
+                          className="input-brand focus-brand rounded-xl px-3.5 py-2.5 text-sm"
+                        >
+                          <option value="">All members</option>
+                          {members.map((member) => (
+                            <option key={member.id} value={member.id}>
+                              {member.name || member.id}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setFiltersOpen(false)}
+                      className="btn-primary focus-brand mt-4 w-full rounded-xl px-4 py-2.5 text-sm font-semibold"
+                    >
+                      Done
+                    </button>
+                  </FiltersDropdownButton>
+                </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-3 rounded-2xl bg-sage-50 p-4 sm:grid-cols-3 lg:grid-cols-5">
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold uppercase text-ink-soft">
-                    From
-                  </span>
-                  <input
-                    type="date"
-                    value={dateFrom}
-                    max={dateTo || undefined}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                    className="input-brand focus-brand rounded-xl px-3.5 py-2.5 text-sm"
-                  />
-                </label>
-
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold uppercase text-ink-soft">
-                    To
-                  </span>
-                  <input
-                    type="date"
-                    value={dateTo}
-                    min={dateFrom || undefined}
-                    onChange={(e) => setDateTo(e.target.value)}
-                    className="input-brand focus-brand rounded-xl px-3.5 py-2.5 text-sm"
-                  />
-                </label>
-
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold uppercase text-ink-soft">
-                    Area
-                  </span>
-                  <select
-                    value={areaId}
-                    onChange={(e) => {
-                      const newAreaId = e.target.value;
-                      setAreaId(newAreaId);
-                      // The team filter is scoped to the selected area, so
-                      // clear it whenever the area filter changes.
-                      setTeamFilter("");
-                    }}
-                    className="input-brand focus-brand rounded-xl px-3.5 py-2.5 text-sm"
-                  >
-                    <option value="">All areas</option>
-                    {areas.map((area) => (
-                      <option key={area.area_id} value={area.area_id}>
-                        {area.area_name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold uppercase text-ink-soft">
-                    Team
-                  </span>
-                  <select
-                    value={teamFilter}
-                    onChange={(e) => setTeamFilter(e.target.value)}
-                    disabled={filterAreaTeams.length === 0}
-                    className="input-brand focus-brand rounded-xl px-3.5 py-2.5 text-sm"
-                  >
-                    <option value="">
-                      {filterAreaTeams.length === 0 ? "No teams" : "All teams"}
-                    </option>
-                    {filterAreaTeams.map((team) => (
-                      <option key={team} value={team}>
-                        {team}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold uppercase text-ink-soft">
-                    Member
-                  </span>
-                  <select
-                    value={memberId}
-                    onChange={(e) => setMemberId(e.target.value)}
-                    className="input-brand focus-brand rounded-xl px-3.5 py-2.5 text-sm"
-                  >
-                    <option value="">All members</option>
-                    {members.map((member) => (
-                      <option key={member.id} value={member.id}>
-                        {member.name || member.id}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              <SurveyTotals
-                stats={totalStats}
-                title={
-                  dateFrom || dateTo || areaId || teamFilter || memberId
-                    ? "Filtered survey stats"
-                    : "Survey stats"
-                }
-              />
 
               {loadingFilters && (
-                <p className="mt-3 text-sm text-ink-soft">
+                <p className="mb-3 text-sm text-ink-soft">
                   Updating results...
                 </p>
               )}
 
-              <div className="mt-5 hidden gap-3 px-4 pb-2 text-xs font-semibold uppercase text-ink-soft sm:grid sm:grid-cols-4">
-                <span>Name</span>
+              <div className="hidden gap-3 px-4 pb-2 text-xs font-semibold uppercase text-ink-soft sm:grid sm:grid-cols-4">
+                <span>Case name</span>
                 <span>Area</span>
-                <span>Mobile</span>
-                <span>Members</span>
+                <span>Filled by</span>
+                <span>Family Members</span>
               </div>
 
-              <div className="flex flex-col gap-2 mt-4">
+              <div className="flex flex-col gap-2">
                 {surveys.length === 0 ? (
                   <p className="text-sm text-ink-soft">
                     No surveys match the selected filters.
@@ -1866,8 +2249,30 @@ export default function CollectionPage(): React.ReactElement {
             </section>
           </>
         )}
+        {/* Reserve space so the floating dock never covers the last rows */}
+        <div className="h-24" aria-hidden="true" />
       </Layout.Body>
       <Layout.Footer />
+      <FloatingActionDock
+        areas={areas}
+        currentAreaId={currentAreaId}
+        currentAreaTeams={currentAreaTeams}
+        currentTeam={currentTeam}
+        onAreaChange={setCurrentArea}
+        onTeamChange={setCurrentTeam}
+        onAddSurvey={() => setAddSurveyOpen(true)}
+      />
+      <AddSurveyDialog
+        open={addSurveyOpen}
+        collectionId={collectionId}
+        onClose={() => setAddSurveyOpen(false)}
+        onFillManually={() => {
+          setInterviewPrefill(null);
+          setAddSurveyOpen(false);
+          setFillOpen(true);
+        }}
+        onReviewJob={handleReviewInterviewJob}
+      />
       <SurveyDetailDialog
         survey={selected}
         onClose={() => setSelected(null)}
@@ -1923,6 +2328,16 @@ export default function CollectionPage(): React.ReactElement {
           await refreshAfterSurveyChange();
         }}
         onAreaCreated={handleAreaCreated}
+      />
+      <SurveyTotalsDialog
+        open={totalsOpen}
+        onClose={() => setTotalsOpen(false)}
+        stats={totalStats}
+        title={
+          dateFrom || dateTo || areaId || teamFilter || memberId
+            ? "Filtered survey totals"
+            : "Survey totals"
+        }
       />
     </Layout>
   );
