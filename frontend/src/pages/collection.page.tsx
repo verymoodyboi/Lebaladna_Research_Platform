@@ -1555,13 +1555,13 @@ function SurveyTotals({
         <StatCard label="Food packs" value={stats.food_packs} />
         <StatCard label="Blankets" value={stats.blankets} />
       <StatCard
-          label="Blankets/Case"
+          label="B/C"
             value={(stats.blankets / stats.cases || 0).toFixed(2)}
         />
 
         <StatCard label="Health" value={stats.health_cases} />
         <StatCard label="Brides" value={stats.brides} />
-        <StatCard label="Microfinance" value={stats.microfinance_cases} />
+        <StatCard label="Micro" value={stats.microfinance_cases} />
 
         <StatCard
           label="Training suites"
