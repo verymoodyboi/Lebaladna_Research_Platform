@@ -1704,12 +1704,14 @@ function FiltersDropdownButton({
       {isOpen && (
         <>
           <div
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-40 bg-black/30 sm:bg-transparent"
             onClick={onClose}
             aria-hidden="true"
           />
-          <div className="absolute right-0 z-50 mt-2 w-[calc(100vw-2rem)] max-w-sm rounded-2xl border border-black/5 bg-white p-4 shadow-[0_16px_40px_rgba(15,23,42,0.18)] sm:w-96">
-            {children}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:flex sm:items-start sm:justify-end sm:p-0 sm:mt-2">
+            <div className="max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-2xl border border-black/5 bg-white p-4 shadow-[0_16px_40px_rgba(15,23,42,0.18)] sm:max-h-[80vh] sm:w-96">
+              {children}
+            </div>
           </div>
         </>
       )}
