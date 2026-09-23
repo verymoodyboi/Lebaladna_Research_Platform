@@ -48,6 +48,10 @@ import type { InterviewJob } from "../features/interviews-audio/interviews.servi
 //   - Survey (surveys.services.ts) gains: team: string | null
 //   - createSurvey()'s input type gains: team?: string
 //   - listSurveys() results/rows include `team` on each survey
+// It also assumes createSurvey()'s input type gains an optional
+// `audio_from?: string` field: the interview_jobs.id of the audio
+// interview a survey was filled from, when applicable, so the two can be
+// linked on the backend.
 // Nothing here changes surveys.services.ts directly — only this page and
 // areas.services.ts are provided.
 
@@ -756,6 +760,13 @@ function FillSurveyDialog({
         microfinance_notes: form.microfinance_notes.trim() || undefined,
         health_notes: form.health_notes.trim() || undefined,
         additional_notes: form.additional_notes.trim() || undefined,
+        // When this survey was filled from an audio interview job,
+        // link the two by sending the interview job id along with the
+        // survey data.
+        // NOTE: requires surveys.services.ts's createSurvey() input type and
+        // implementation to accept and forward this optional "audio_from"
+        // field (see integration note near the top of this file).
+        audio_from: sourceJobId || undefined,
       });
 
       onCreated(survey);

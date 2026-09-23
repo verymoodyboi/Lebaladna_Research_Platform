@@ -21,7 +21,8 @@ const SURVEY_COLUMNS = `
   created_by,
   created_at,
   creator:users(user_id, first_name, last_name),
-  team
+  team,
+  audio_from
 `;
 
 export interface SurveyFilters {
@@ -157,6 +158,7 @@ export interface CreateSurveyInput {
   collection_id: string;
   created_by: string;
   team?:string
+  audio_from?:any
 }
 
 export const createSurvey = async (input: CreateSurveyInput) => {

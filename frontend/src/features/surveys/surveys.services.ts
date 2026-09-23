@@ -22,6 +22,8 @@ export interface Survey {
   created_at: string;
   team?: any;
   creator?: { user_id?: string; first_name: string; last_name: string } | null;
+          audio_from?:any;
+
 }
 
 export interface SurveyStats {
@@ -76,6 +78,8 @@ export interface CreateSurveyInput {
   additional_notes?: string;
   collection_id: string;
   team?:any
+          audio_from?: any;
+
 }
 
 export const createSurvey = (input: CreateSurveyInput) =>
